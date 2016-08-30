@@ -12,6 +12,7 @@
 @interface ViewController ()
 
 @property (nonatomic, strong) HierarchyView *topView;
+@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 
 @end
 
@@ -23,6 +24,11 @@
     
     _topView = [[HierarchyView alloc] initWithFrame:CGRectMake(0, 80, self.view.bounds.size.width, 50)];
     _topView.backgroundColor = [UIColor yellowColor];
+    _topView.titleArray = @[@"11111",@"222222222222",@"3333",@"4",@"555",@"666666",@"7777777",@"888888888888888"];
+    __weak typeof(self) weakSelf = self;
+    _topView.selectedHandler = ^(id item, NSIndexPath *indexPath){
+        weakSelf.titleLabel.text = item;
+    };
     [self.view addSubview:_topView];
     
 }

@@ -10,6 +10,8 @@
 
 typedef void(^ConfigCollectionCellBlock)(UICollectionViewCell *aCell,id item, NSIndexPath *indexPath, BOOL isEnd);
 
+typedef void(^SelectedHandler)(id item ,NSIndexPath *indexPath);
+
 @interface HierarchyViewFlowLayout : UICollectionViewFlowLayout
 
 @property (nonatomic, strong) NSArray<NSString *> *titleArray;
@@ -36,5 +38,9 @@ typedef void(^ConfigCollectionCellBlock)(UICollectionViewCell *aCell,id item, NS
  *  self.automaticallyAdjustsScrollViewInsets = NO;
  */
 @interface HierarchyView : UIView
+
+@property (nonatomic, strong) NSArray *titleArray;
+
+@property (nonatomic, copy) SelectedHandler selectedHandler;
 
 @end

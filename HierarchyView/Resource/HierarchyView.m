@@ -178,7 +178,7 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
     }else
     {
         self.arrowImage.hidden = NO;
-        self.backView.backgroundColor = [UIColor cyanColor];
+        self.backView.backgroundColor = [UIColor lightGrayColor];
         self.backView.layer.borderColor = [UIColor blackColor].CGColor;
         
         [self.backView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -197,7 +197,7 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         _backView.backgroundColor = [UIColor purpleColor];
         _backView.layer.masksToBounds = YES;
         _backView.layer.cornerRadius = self.frame.size.height / 2;
-        _backView.layer.borderColor = [UIColor blackColor].CGColor;
+        _backView.layer.borderColor = [UIColor lightGrayColor].CGColor;
         _backView.layer.borderWidth = 1;
         [self.contentView addSubview:_backView];
     }
@@ -250,10 +250,26 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
     return self;
 }
 
+- (void)setTitleArray:(NSArray *)titleArray
+{
+    _titleArray = titleArray;
+    [self refreshInfo];
+}
+
+- (void)refreshInfo
+{
+    self.flowLayout.titleArray = _titleArray;
+    self.dataSource.items = _titleArray;
+    [self.collectionView reloadData];
+}
+
 #pragma mark - UICollectionViewDelegate
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    id item = [self.dataSource.items objectAtIndex:indexPath.row];
+    if (self.selectedHandler) {
+        self.selectedHandler(item, indexPath);
+    }
 }
 
 #pragma mark - lazy load
@@ -274,11 +290,8 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         _dataSource.cellConfigBlock = ^(UICollectionViewCell *aCell, id item, NSIndexPath *indexPath, BOOL isEnd){
         
             HierarchyViewCell *cell = (HierarchyViewCell *)aCell;
-            cell.backgroundColor = [UIColor redColor];
-            cell.backView.backgroundColor = [UIColor cyanColor];
             [cell setTitle:item isEnd:isEnd];
         };
-        _dataSource.items = @[@"11111",@"222222222222",@"3333",@"4",@"555",@"666666",@"7777777",@"888888888888888"];
     }
 }
 
@@ -292,7 +305,7 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.delegate = self;
         _collectionView.dataSource = _dataSource;
-        _collectionView.backgroundColor = [UIColor lightGrayColor];
+        _collectionView.backgroundColor = [UIColor cyanColor];
         [self addSubview:_collectionView];
         
         [_collectionView registerClass:[HierarchyViewCell class] forCellWithReuseIdentifier:hierarchyViewCellReuseIdentifier];
