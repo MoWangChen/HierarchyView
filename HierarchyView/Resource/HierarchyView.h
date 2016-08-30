@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void(^ConfigCollectionCellBlock)(UICollectionViewCell *aCell,id item, NSIndexPath *indexPath);
+typedef void(^ConfigCollectionCellBlock)(UICollectionViewCell *aCell,id item, NSIndexPath *indexPath, BOOL isEnd);
 
 @interface HierarchyViewFlowLayout : UICollectionViewFlowLayout
 
@@ -30,6 +30,11 @@ typedef void(^ConfigCollectionCellBlock)(UICollectionViewCell *aCell,id item, NS
 
 @end
 
+/**
+ *  使用注意：
+ *  视图中使用CollectionView,在导航视图中，会出现自动偏移
+ *  self.automaticallyAdjustsScrollViewInsets = NO;
+ */
 @interface HierarchyView : UIView
 
 @end

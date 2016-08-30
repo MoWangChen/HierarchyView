@@ -21,7 +21,7 @@
 {
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
-    _topView = [[HierarchyView alloc] initWithFrame:CGRectMake(0, 80, self.view.bounds.size.width, 100)];
+    _topView = [[HierarchyView alloc] initWithFrame:CGRectMake(0, 80, self.view.bounds.size.width, 60)];
     _topView.backgroundColor = [UIColor yellowColor];
     [self.view addSubview:_topView];
 }

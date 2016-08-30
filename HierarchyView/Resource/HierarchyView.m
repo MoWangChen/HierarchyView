@@ -8,9 +8,11 @@
 
 #import "HierarchyView.h"
 #import "NSString+Addition.h"
+#import <Masonry/Masonry.h>
 
 #define CellHorizontalSping 5
 #define CellTitleFont       [UIFont systemFontOfSize:15]
+#define ArrowImageWidth     10
 
 NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIdentifier";
 
@@ -46,7 +48,12 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         CGSize size = [title sizeWithFont:CellTitleFont AndHeight:16];
         
         NSUInteger sizeHeight = [self columnHeight];
-        NSUInteger sizeWidth = size.width + sizeHeight;
+        NSUInteger sizeWidth = 0;
+        if (index == _titleArray.count - 1) {
+            sizeWidth = size.width + sizeHeight;
+        }else {
+            sizeWidth = size.width + sizeHeight + ArrowImageWidth + CellHorizontalSping;
+        }
         
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
         UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
@@ -94,7 +101,11 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:_reuseIdentifier forIndexPath:indexPath];
     if (_cellConfigBlock) {
         id item = [_items objectAtIndex:indexPath.row];
-        _cellConfigBlock(cell, item, indexPath);
+        BOOL isEnd = NO;
+        if (indexPath.row == _items.count - 1) {
+            isEnd = YES;
+        }
+        _cellConfigBlock(cell, item, indexPath, isEnd);
     }
     return cell;
 }
@@ -108,6 +119,8 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
 
 @property (nonatomic, strong) UILabel *titleLabel;
 
+@property (nonatomic, strong) UIImageView *arrowImage;
+
 @end
 
 @implementation HierarchyViewCell
@@ -118,13 +131,63 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         
         [self loadBackView];
         [self loadTitleLabel];
+        [self loadArrowImage];
+        [self setupUI];
     }
     return self;
 }
 
 - (void)setupUI
 {
+    [self.backView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.mas_equalTo(self.contentView.mas_leading);
+        make.trailing.mas_equalTo(self.contentView.mas_trailing).offset(-ArrowImageWidth - CellHorizontalSping);
+        make.top.mas_equalTo(self.contentView.mas_top);
+        make.bottom.mas_equalTo(self.contentView.mas_bottom);
+    }];
     
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.leading.mas_equalTo(self.backView.mas_leading);
+        make.trailing.mas_equalTo(self.backView.mas_trailing);
+        make.top.mas_equalTo(self.backView.mas_top);
+        make.bottom.mas_equalTo(self.backView.mas_bottom);
+    }];
+    
+    [self.arrowImage mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.contentView);
+        make.bottom.mas_equalTo(self.contentView);
+        make.trailing.mas_equalTo(self.contentView);
+        make.width.mas_equalTo(ArrowImageWidth);
+    }];
+}
+
+- (void)setTitle:(NSString *)title isEnd:(BOOL)isEnd
+{
+    self.titleLabel.text = title;
+    if (isEnd) {
+        self.arrowImage.hidden = YES;
+        self.backView.backgroundColor = [UIColor clearColor];
+        self.backView.layer.borderColor = [UIColor clearColor].CGColor;
+        
+        [self.backView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.mas_equalTo(self.contentView.mas_leading);
+            make.trailing.mas_equalTo(self.contentView.mas_trailing);
+            make.top.mas_equalTo(self.contentView.mas_top);
+            make.bottom.mas_equalTo(self.contentView.mas_bottom);
+        }];
+    }else
+    {
+        self.arrowImage.hidden = NO;
+        self.backView.backgroundColor = [UIColor cyanColor];
+        self.backView.layer.borderColor = [UIColor blackColor].CGColor;
+        
+        [self.backView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.leading.mas_equalTo(self.contentView.mas_leading);
+            make.trailing.mas_equalTo(self.contentView.mas_trailing).offset(-ArrowImageWidth - CellHorizontalSping);
+            make.top.mas_equalTo(self.contentView.mas_top);
+            make.bottom.mas_equalTo(self.contentView.mas_bottom);
+        }];
+    }
 }
 
 - (void)loadBackView
@@ -134,6 +197,8 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         _backView.backgroundColor = [UIColor purpleColor];
         _backView.layer.masksToBounds = YES;
         _backView.layer.cornerRadius = self.frame.size.height / 2;
+        _backView.layer.borderColor = [UIColor blackColor].CGColor;
+        _backView.layer.borderWidth = 1;
         [self.contentView addSubview:_backView];
     }
 }
@@ -146,7 +211,17 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
         _titleLabel.font = CellTitleFont;
         _titleLabel.textColor = [UIColor whiteColor];
         _titleLabel.textAlignment = NSTextAlignmentCenter;
-        [self.contentView addSubview:_titleLabel];
+        [self.backView addSubview:_titleLabel];
+    }
+}
+
+- (void)loadArrowImage
+{
+    if (!_arrowImage) {
+        _arrowImage = [[UIImageView alloc] init];
+        _arrowImage.image = [UIImage imageNamed:@"mine_arrow_icon"];
+        _arrowImage.contentMode = UIViewContentModeCenter;
+        [self.contentView addSubview:_arrowImage];
     }
 }
 
@@ -196,12 +271,12 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
     if (!_dataSource) {
         _dataSource = [[CollectionViewArrayDataSource alloc] init];
         _dataSource.reuseIdentifier = hierarchyViewCellReuseIdentifier;
-        _dataSource.cellConfigBlock = ^(UICollectionViewCell *aCell, id item, NSIndexPath *indexPath){
+        _dataSource.cellConfigBlock = ^(UICollectionViewCell *aCell, id item, NSIndexPath *indexPath, BOOL isEnd){
         
             HierarchyViewCell *cell = (HierarchyViewCell *)aCell;
             cell.backgroundColor = [UIColor redColor];
             cell.backView.backgroundColor = [UIColor cyanColor];
-            cell.titleLabel.text = item;
+            [cell setTitle:item isEnd:isEnd];
         };
         _dataSource.items = @[@"11111",@"222222222222",@"3333",@"4",@"555",@"666666",@"7777777",@"888888888888888"];
     }
