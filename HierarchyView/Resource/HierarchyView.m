@@ -315,6 +315,10 @@ NSString * const hierarchyViewCellReuseIdentifier = @"hierarchyViewCellReuseIden
 - (void)dealloc
 {
     NSLog(@"HierarchyView dealloc");
+    _collectionView.delegate = nil;
+    _collectionView.dataSource = nil;
+    _collectionView = nil;
+    _dataSource = nil;
 }
 
 @end
